@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>푸드 페스타 — 네이버 쇼핑</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  background: #f0f0f0;
+  min-height: 100vh;
+  color: #111;
+}
+
+/* ════════════════════════════════
+   LAYOUT SHELL
+════════════════════════════════ */
+.site-wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  background: #fff;
+  min-height: 100vh;
+}
+
+/* ════════════════════════════════
+   TOPBAR (PC only)
+════════════════════════════════ */
+.topbar {
+  display: none;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  padding: 0 40px;
+  height: 56px;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar-logo { font-size: 22px; font-weight: 900; color: #03C75A; letter-spacing: -0.5px; }
+.topbar-nav { display: flex; gap: 28px; }
+.topbar-nav a { font-size: 14px; color: #444; text-decoration: none; }
+.topbar-nav a:hover { color: #03C75A; }
+.topbar-right { display: flex; gap: 12px; align-items: center; font-size: 13px; color: #666; cursor: pointer; }
+
+/* ════════════════════════════════
+   HERO / HEADER
+════════════════════════════════ */
+.festa-header {
+  background: #1a1a2e;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Mobile: stack (img top, info bottom) */
+.festa-header-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.festa-header-img-wrap {
+  width: 100%;
+  height: 220px;
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.festa-header-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: none;
+  position: absolute; inset: 0;
+}
+.festa-header-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 2px dashed rgba(255,255,255,0.2);
+  transition: background 0.2s;
+}
+.festa-header-placeholder:hover { background: rgba(255,255,255,0.1); }
+.festa-header-placeholder .ti { font-size: 40px; color: rgba(255,255,255,0.3); }
+.festa-header-placeholder span { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+.header-edit-pill {
+  position: absolute; bottom: 10px; right: 10px;
+  background: rgba(0,0,0,0.6); color: #fff; font-size: 11px;
+  padding: 4px 10px; border-radius: 20px;
+  display: none; align-items: center; gap: 4px;
+}
+
+.festa-info {
+  padding: 20px 20px 24px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.festa-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #03C75A; color: #fff;
+  font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 20px;
+  margin-bottom: 12px; align-self: flex-start;
+}
+.festa-title {
+  color: #fff; font-size: 26px; font-weight: 800;
+  line-height: 1.3; margin-bottom: 8px;
+}
+.festa-subtitle {
+  color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 20px;
+}
+.festa-timer { display: flex; align-items: center; gap: 8px; }
+.timer-block {
+  background: rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 8px 14px;
+  text-align: center; min-width: 56px;
+}
+.timer-num { color: #fff; font-size: 22px; font-weight: 800; display: block; letter-spacing: 1px; }
+.timer-label { color: rgba(255,255,255,0.5); font-size: 10px; display: block; margin-top: 2px; }
+.timer-sep { color: rgba(255,255,255,0.35); font-size: 22px; font-weight: 700; }
+
+/* ════════════════════════════════
+   EDIT BAR
+════════════════════════════════ */
+.edit-bar {
+  background: #fffbe6;
+  border-top: 1px solid #ffe58f;
+  border-bottom: 1px solid #ffe58f;
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: #856404;
+}
+.edit-bar .ti { font-size: 16px; }
+
+/* ════════════════════════════════
+   CONTENT AREA (padded inner)
+════════════════════════════════ */
+.content-area { padding: 0 16px; }
+
+/* ════════════════════════════════
+   BANNER ROW  (PC: side-by-side)
+════════════════════════════════ */
+.banner-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.banner-item {
+  flex: 1;
+  cursor: pointer;
+  position: relative;
+}
+.banner-inner {
+  width: 100%; height: 120px;
+  border-radius: 12px; overflow: hidden; position: relative;
+}
+.banner-inner img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: none;
+}
+.banner-placeholder {
+  width: 100%; height: 100%;
+  background: #f4f4f4; border: 2px dashed #d8d8d8; border-radius: 12px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.2s;
+}
+.banner-placeholder:hover { background: #ebebeb; }
+.banner-placeholder .ti { font-size: 26px; color: #bbb; }
+.banner-placeholder span { font-size: 12px; color: #aaa; }
+.banner-edit-pill {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.5); color: #fff; font-size: 11px;
+  padding: 3px 9px; border-radius: 20px;
+  display: none; align-items: center; gap: 4px;
+}
+
+/* ════════════════════════════════
+   DIVIDER
+════════════════════════════════ */
+.divider { height: 8px; background: #f5f5f5; margin: 0 -16px; }
+
+/* ════════════════════════════════
+   SECTION ROW
+════════════════════════════════ */
+.section-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0 12px;
+}
+.section-title { font-size: 17px; font-weight: 800; color: #111; }
+.section-more {
+  font-size: 13px; color: #888;
+  display: flex; align-items: center; gap: 2px; cursor: pointer;
+}
+.section-more:hover { color: #03C75A; }
+
+/* ════════════════════════════════
+   PRODUCT GRID
+════════════════════════════════ */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding-bottom: 20px;
+}
+
+.product-card {
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid #ececec; background: #fff;
+  position: relative; transition: transform 0.15s, box-shadow 0.15s;
+}
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+}
+
+.product-img-wrap {
+  position: relative; width: 100%; padding-top: 100%;
+  background: #f8f8f8; overflow: hidden; cursor: pointer;
+}
+.product-img-wrap img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: none;
+}
+.product-img-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  background: #f5f5f5; transition: background 0.2s;
+}
+.product-img-placeholder:hover { background: #ebebeb; }
+.product-img-placeholder .ti { font-size: 32px; color: #ccc; }
+.product-img-placeholder span { font-size: 11px; color: #bbb; }
+
+.discount-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: #ff4040; color: #fff;
+  font-size: 12px; font-weight: 800;
+  padding: 3px 8px; border-radius: 6px; z-index: 2;
+}
+.img-change-btn {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.6); color: #fff; border: none;
+  border-radius: 20px; padding: 5px 10px; font-size: 11px;
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  z-index: 2; transition: background 0.2s;
+}
+.img-change-btn:hover { background: rgba(0,0,0,0.88); }
+
+.product-info { padding: 12px 12px 14px; }
+.product-brand { font-size: 11px; color: #999; margin-bottom: 4px; }
+.product-name {
+  font-size: 13px; font-weight: 500; color: #111;
+  line-height: 1.45; margin-bottom: 10px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; min-height: 38px;
+}
+.price-row { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+.price-discount { font-size: 14px; font-weight: 800; color: #ff4040; }
+.price-main { font-size: 15px; font-weight: 800; color: #111; }
+.price-original { font-size: 11px; color: #bbb; text-decoration: line-through; margin-top: 3px; }
+.rating-row { display: flex; align-items: center; gap: 3px; margin-top: 6px; font-size: 11px; color: #999; }
+.star-icon { color: #FFA500; }
+
+/* ════════════════════════════════
+   BOTTOM BANNER
+════════════════════════════════ */
+.bottom-banner { padding: 0 0 24px; cursor: pointer; }
+.bottom-banner-inner {
+  width: 100%; height: 90px;
+  border-radius: 12px; overflow: hidden; position: relative;
+}
+.bottom-banner-inner img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.bottom-banner-placeholder {
+  width: 100%; height: 100%;
+  background: #f5f5f5; border: 2px dashed #ddd; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; font-size: 12px; color: #bbb; transition: background 0.2s;
+}
+.bottom-banner-placeholder:hover { background: #ebebeb; }
+.bottom-banner-placeholder .ti { font-size: 18px; }
+
+/* ════════════════════════════════
+   FOOTER
+════════════════════════════════ */
+.page-footer {
+  padding: 20px; text-align: center;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px; color: #ccc;
+}
+
+/* ════════════════════════════════
+   MODAL
+════════════════════════════════ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); z-index: 9999;
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: #fff; border-radius: 20px 20px 0 0;
+  padding: 24px 24px 40px;
+  width: 100%; max-width: 480px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: #e0e0e0; border-radius: 2px; margin: 0 auto 20px;
+}
+.modal-title { font-size: 16px; font-weight: 800; color: #111; margin-bottom: 6px; }
+.modal-desc { font-size: 13px; color: #888; margin-bottom: 18px; }
+.modal-preview {
+  width: 100%; height: 140px; object-fit: cover;
+  border-radius: 10px; margin-bottom: 14px;
+  display: none; border: 1px solid #ececec;
+}
+.modal-btns { display: flex; gap: 8px; }
+.modal-btn {
+  flex: 1; padding: 13px; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer; border: none;
+  transition: opacity 0.15s;
+}
+.modal-btn:hover { opacity: 0.85; }
+.modal-btn.primary { background: #03C75A; color: #fff; }
+.modal-btn.secondary { background: #f5f5f5; color: #444; }
+
+input[type=file] { display: none; }
+
+/* ════════════════════════════════
+   RESPONSIVE — TABLET  ≥ 640px
+════════════════════════════════ */
+@media (min-width: 640px) {
+  .content-area { padding: 0 24px; }
+  .banner-row { flex-direction: row; }
+  .banner-inner { height: 140px; }
+  .product-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .festa-title { font-size: 28px; }
+}
+
+/* ════════════════════════════════
+   RESPONSIVE — DESKTOP  ≥ 1024px
+════════════════════════════════ */
+@media (min-width: 1024px) {
+  .topbar { display: flex; }
+
+  .content-area { padding: 0 40px; }
+
+  /* Hero: side-by-side — img left, info right */
+  .festa-header-inner {
+    flex-direction: row;
+    min-height: 360px;
+  }
+  .festa-header-img-wrap {
+    flex: 1 1 55%;
+    height: auto;
+    min-height: 360px;
+  }
+  .festa-info {
+    flex: 1 1 45%;
+    padding: 48px 48px 48px 40px;
+  }
+  .festa-title { font-size: 34px; }
+  .festa-subtitle { font-size: 15px; }
+  .festa-badge { font-size: 12px; padding: 5px 14px; }
+  .timer-num { font-size: 26px; }
+  .timer-block { min-width: 68px; padding: 10px 16px; }
+
+  .banner-inner { height: 160px; }
+  .banner-row { gap: 16px; padding: 24px 0; }
+
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .product-name { font-size: 14px; min-height: 42px; }
+  .price-main { font-size: 16px; }
+  .price-discount { font-size: 15px; }
+
+  .section-title { font-size: 19px; }
+  .section-row { padding: 28px 0 14px; }
+
+  .bottom-banner-inner { height: 110px; }
+  .divider { margin: 0 -40px; }
+
+  .edit-bar { padding: 10px 40px; font-size: 13px; }
+
+  /* PC modal — centered, not bottom sheet */
+  .modal-overlay { align-items: center; }
+  .modal-sheet {
+    border-radius: 16px;
+    max-width: 440px;
+    padding: 28px 28px 32px;
+    animation: fadeScale 0.2s ease;
+  }
+  .modal-handle { display: none; }
+  @keyframes fadeScale {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+}
+
+/* ════════════════════════════════
+   RESPONSIVE — WIDE  ≥ 1280px
+════════════════════════════════ */
+@media (min-width: 1280px) {
+  .festa-title { font-size: 38px; }
+  .festa-info { padding: 56px 60px 56px 48px; }
+  .festa-header-img-wrap { min-height: 400px; }
+}
+
+/* ════════════════════════════════
+   SMALL PHONE
+════════════════════════════════ */
+@media (max-width: 360px) {
+  .product-grid { gap: 8px; }
+  .festa-title { font-size: 22px; }
+  .timer-block { min-width: 48px; padding: 6px 10px; }
+  .timer-num { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="site-wrap">
+
+  <!-- PC TOPBAR -->
+  <nav class="topbar">
+    <div class="topbar-logo">N 쇼핑</div>
+    <div class="topbar-nav">
+      <a href="#">홈</a>
+      <a href="#">카테고리</a>
+      <a href="#">페스타</a>
+      <a href="#">브랜드</a>
+      <a href="#">라이브</a>
+    </div>
+    <div class="topbar-right">
+      <i class="ti ti-search" style="font-size:18px;"></i>
+      <i class="ti ti-shopping-cart" style="font-size:18px;"></i>
+      <i class="ti ti-user" style="font-size:18px;"></i>
+    </div>
+  </nav>
+
+  <!-- HERO HEADER -->
+  <div class="festa-header">
+    <div class="festa-header-inner">
+
+      <div class="festa-header-img-wrap" id="header-wrap" onclick="openModal('header')">
+        <div class="festa-header-placeholder" id="header-placeholder">
+          <i class="ti ti-photo"></i>
+          <span>헤더 이미지 클릭하여 교체</span>
+        </div>
+        <img id="header-img" src="" alt="헤더 이미지">
+        <div class="header-edit-pill" id="header-edit-pill">
+          <i class="ti ti-camera" style="font-size:11px;"></i> 이미지 변경
+        </div>
+      </div>
+
+      <div class="festa-info">
+        <div class="festa-badge">🍽️ FOOD FESTA</div>
+        <div class="festa-title">최대 50% 할인<br>푸드 특가 페스타</div>
+        <div class="festa-subtitle">지금 바로 장바구니 담고 혜택 받기</div>
+        <div class="festa-timer">
+          <div class="timer-block">
+            <span class="timer-num" id="t-h">03</span>
+            <span class="timer-label">시간</span>
+          </div>
+          <span class="timer-sep">:</span>
+          <div class="timer-block">
+            <span class="timer-num" id="t-m">47</span>
+            <span class="timer-label">분</span>
+          </div>
+          <span class="timer-sep">:</span>
+          <div class="timer-block">
+            <span class="timer-num" id="t-s">22</span>
+            <span class="timer-label">초</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EDIT BAR -->
+  <div class="edit-bar">
+    <i class="ti ti-info-circle"></i>
+    이미지 영역을 클릭하면 원하는 이미지로 교체할 수 있어요
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content-area">
+
+    <!-- BANNER ROW -->
+    <div class="banner-row">
+      <div class="banner-item" onclick="openModal('banner1')">
+        <div class="banner-inner">
+          <div class="banner-placeholder" id="banner1-placeholder">
+            <i class="ti ti-photo"></i>
+            <span>배너 이미지 교체</span>
+          </div>
+          <img id="banner1-img" src="" alt="배너 1">
+          <div class="banner-edit-pill" id="banner1-edit-pill">
+            <i class="ti ti-camera" style="font-size:11px;"></i> 변경
+          </div>
+        </div>
+      </div>
+      <div class="banner-item" onclick="openModal('banner2')">
+        <div class="banner-inner">
+          <div class="banner-placeholder" id="banner2-placeholder">
+            <i class="ti ti-photo"></i>
+            <span>배너 이미지 교체</span>
+          </div>
+          <img id="banner2-img" src="" alt="배너 2">
+          <div class="banner-edit-pill" id="banner2-edit-pill">
+            <i class="ti ti-camera" style="font-size:11px;"></i> 변경
+          </div>
+        </div>
+      </div>
+      <div class="banner-item" onclick="openModal('banner3')">
+        <div class="banner-inner">
+          <div class="banner-placeholder" id="banner3-placeholder">
+            <i class="ti ti-photo"></i>
+            <span>배너 이미지 교체</span>
+          </div>
+          <img id="banner3-img" src="" alt="배너 3">
+          <div class="banner-edit-pill" id="banner3-edit-pill">
+            <i class="ti ti-camera" style="font-size:11px;"></i> 변경
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PRODUCTS -->
+    <div class="section-row">
+      <span class="section-title">🔥 지금 인기 특가</span>
+      <span class="section-more">전체보기 <i class="ti ti-chevron-right" style="font-size:13px;"></i></span>
+    </div>
+    <div class="product-grid" id="product-grid"></div>
+
+    <div class="divider"></div>
+
+    <!-- BOTTOM BANNER -->
+    <div class="bottom-banner" onclick="openModal('bottombanner')">
+      <div class="bottom-banner-inner">
+        <div class="bottom-banner-placeholder" id="bottombanner-placeholder">
+          <i class="ti ti-photo"></i>
+          하단 배너 이미지 교체
+        </div>
+        <img id="bottombanner-img" src="" alt="하단 배너">
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+
+  <div class="page-footer">NAVER Shopping · 이미지 편집 데모 페이지</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">이미지 교체</div>
+    <div class="modal-desc">교체할 이미지를 선택하세요 (JPG, PNG, GIF, WEBP)</div>
+    <img class="modal-preview" id="modal-preview" src="" alt="미리보기">
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeModal()">취소</button>
+      <button class="modal-btn primary" onclick="document.getElementById('file-input').click()">이미지 선택</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="image/*">
+
+<script>
+const products = [
+  { brand:"CJ제일제당", name:"비비고 왕교자 만두 1.05kg",           discount:30, price:"10,990", original:"15,700", rating:"4.8", reviews:"2.3만" },
+  { brand:"동원F&B",   name:"참치 라이트스탠다드 150g×10캔 세트",   discount:25, price:"14,900", original:"19,900", rating:"4.7", reviews:"8.9천" },
+  { brand:"농심",      name:"신라면 멀티팩 120g×20개입",             discount:20, price:"15,800", original:"19,800", rating:"4.9", reviews:"5.1만" },
+  { brand:"오뚜기",    name:"맛있는 오뚜기밥 210g×12개 즉석밥",     discount:35, price:"11,500", original:"17,700", rating:"4.6", reviews:"3.2만" },
+  { brand:"풀무원",    name:"생가득 두부 순두부찌개용 350g×4입",     discount:15, price: "8,900", original:"10,500", rating:"4.5", reviews:"1.4만" },
+  { brand:"하림",      name:"닭가슴살 훈제 100g×10팩 단백질 간식",  discount:40, price:"12,900", original:"21,500", rating:"4.7", reviews:"9.7천" },
+  { brand:"사조대림",  name:"살코기 참치 85g×12캔 혼합 세트",       discount:22, price: "9,800", original:"12,500", rating:"4.6", reviews:"6.2천" },
+  { brand:"빙그레",    name:"요플레 오리지널 딸기 85g×12개입",       discount:18, price: "7,200", original: "8,800", rating:"4.4", reviews:"3.8천" }
+];
+
+const grid = document.getElementById('product-grid');
+products.forEach((p, i) => {
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.innerHTML = `
+    <div class="product-img-wrap" onclick="openModal('prod-${i}')">
+      <div class="product-img-placeholder" id="prod-ph-${i}">
+        <i class="ti ti-camera"></i>
+        <span>이미지 교체</span>
+      </div>
+      <img id="prod-img-${i}" src="" alt="${p.name}">
+      <div class="discount-badge">-${p.discount}%</div>
+      <button class="img-change-btn" onclick="event.stopPropagation();openModal('prod-${i}')">
+        <i class="ti ti-camera" style="font-size:11px;"></i> 변경
+      </button>
+    </div>
+    <div class="product-info">
+      <div class="product-brand">${p.brand}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="price-row">
+        <span class="price-discount">${p.discount}%</span>
+        <span class="price-main">${p.price}원</span>
+      </div>
+      <div class="price-original">${p.original}원</div>
+      <div class="rating-row"><span class="star-icon">★</span> ${p.rating} (${p.reviews})</div>
+    </div>`;
+  grid.appendChild(card);
+});
+
+/* ── Modal ── */
+let currentTarget = null;
+const overlay  = document.getElementById('modal-overlay');
+const fileInput = document.getElementById('file-input');
+
+const labels = {
+  header:'헤더 이미지 교체',
+  banner1:'배너1 이미지 교체', banner2:'배너2 이미지 교체', banner3:'배너3 이미지 교체',
+  bottombanner:'하단 배너 이미지 교체'
+};
+
+function openModal(target) {
+  currentTarget = target;
+  document.getElementById('modal-preview').style.display = 'none';
+  document.getElementById('modal-title').textContent = labels[target] || '상품 이미지 교체';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  overlay.classList.remove('open');
+  currentTarget = null;
+  fileInput.value = '';
+  document.body.style.overflow = '';
+}
+
+fileInput.addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file || !currentTarget) return;
+  const reader = new FileReader();
+  reader.onload = e => { applyImage(currentTarget, e.target.result); closeModal(); };
+  reader.readAsDataURL(file);
+});
+
+function applyImage(target, url) {
+  const show = (imgId, phId, pillId) => {
+    const img = document.getElementById(imgId);
+    if (!img) return;
+    img.src = url; img.style.display = 'block';
+    const ph = document.getElementById(phId);
+    if (ph) ph.style.display = 'none';
+    const pill = document.getElementById(pillId);
+    if (pill) pill.style.display = 'flex';
+  };
+  if      (target === 'header')       show('header-img',       'header-placeholder',       'header-edit-pill');
+  else if (target === 'banner1')      show('banner1-img',       'banner1-placeholder',      'banner1-edit-pill');
+  else if (target === 'banner2')      show('banner2-img',       'banner2-placeholder',      'banner2-edit-pill');
+  else if (target === 'banner3')      show('banner3-img',       'banner3-placeholder',      'banner3-edit-pill');
+  else if (target === 'bottombanner') show('bottombanner-img',  'bottombanner-placeholder', null);
+  else if (target.startsWith('prod-')) {
+    const idx = target.replace('prod-', '');
+    show('prod-img-' + idx, 'prod-ph-' + idx, null);
+  }
+}
+
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+/* ── Timer ── */
+let secs = 3 * 3600 + 47 * 60 + 22;
+const pad = n => n < 10 ? '0' + n : '' + n;
+setInterval(() => {
+  if (secs <= 0) return; secs--;
+  document.getElementById('t-h').textContent = pad(Math.floor(secs / 3600));
+  document.getElementById('t-m').textContent = pad(Math.floor((secs % 3600) / 60));
+  document.getElementById('t-s').textContent = pad(secs % 60);
+}, 1000);
+</script>
+</body>
+</html>
