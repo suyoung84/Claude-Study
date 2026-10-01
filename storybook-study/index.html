@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storybook 스터디 계획</title>
+<meta name="description" content="Storybook 10.x로 컴포넌트 라이브러리를 만들고 문서화·테스트·배포·Figma 연동까지 해보는 6주 스터디 계획">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --paper:#EDF0F4;
+  --sheet:#FFFFFF;
+  --ink:#16233A;
+  --ink-2:#4A5872;
+  --line:#CDD4DF;
+  --cobalt:#2F5BEA;
+  --cobalt-soft:#DCE4FC;
+  --mint:#1E9E7E;
+  --mint-soft:#D5F1E9;
+  --amber:#C7801A;
+  --amber-soft:#FBEBD2;
+  --rose:#D2465F;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121A27; --sheet:#1A2435; --ink:#E7ECF4; --ink-2:#A3AFC4; --line:#2E3B52;
+    --cobalt:#7C9BFF; --cobalt-soft:#22325C; --mint:#4FD1AE; --mint-soft:#163D35;
+    --amber:#F0B45A; --amber-soft:#3D2E15; --rose:#FF7A90;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121A27; --sheet:#1A2435; --ink:#E7ECF4; --ink-2:#A3AFC4; --line:#2E3B52;
+  --cobalt:#7C9BFF; --cobalt-soft:#22325C; --mint:#4FD1AE; --mint-soft:#163D35;
+  --amber:#F0B45A; --amber-soft:#3D2E15; --rose:#FF7A90;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  font-size:17px;line-height:1.65;word-break:keep-all;
+}
+a{color:var(--cobalt)}
+a:focus-visible,button:focus-visible,input:focus-visible+span{outline:3px solid var(--cobalt);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+section{padding:56px 0;border-top:1px solid var(--line)}
+h1,h2,h3{line-height:1.25;margin:0}
+h2{font-size:clamp(24px,3.2vw,32px);font-weight:750;letter-spacing:-.02em;margin-bottom:10px}
+.lead{color:var(--ink-2);max-width:62ch;margin:0 0 28px}
+
+/* ---------- hero: one component, three stories ---------- */
+.hero{padding:64px 0 56px;display:grid;grid-template-columns:1fr 1.15fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(40px,6.4vw,72px);font-weight:800;letter-spacing:-.04em;line-height:1.05}
+.hero h1 small{display:block;font-size:.42em;font-weight:600;letter-spacing:-.01em;color:var(--ink-2);margin-top:14px;line-height:1.3}
+.hero p{color:var(--ink-2);max-width:40ch;margin:22px 0 0}
+.hero .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;padding:0;list-style:none}
+.hero .facts li{background:var(--sheet);border:1px solid var(--line);border-radius:999px;padding:4px 14px;font-size:14px;font-weight:600}
+
+.canvas{
+  background:var(--sheet);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 0 var(--line);
+}
+.canvas-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink-2)}
+.canvas-bar b{color:var(--ink);font-weight:700}
+.canvas-bar .tree{margin-left:auto;display:flex;gap:4px}
+.canvas-bar .tree button{
+  font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--ink-2);
+  border-radius:6px;padding:3px 10px;cursor:pointer
+}
+.canvas-bar .tree button[aria-pressed="true"]{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+.stage{
+  padding:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:24px 24px;background-position:-1px -1px;
+  background-color:var(--paper);
+}
+.story{display:flex;flex-direction:column;gap:8px;transition:opacity .25s}
+.story.dim{opacity:.28}
+.story figcaption{font-size:12px;color:var(--ink-2);font-weight:600}
+.pcard{background:var(--sheet);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pcard .img{aspect-ratio:1/1;background:linear-gradient(135deg,var(--amber-soft),var(--cobalt-soft));display:grid;place-items:center;font-size:34px}
+.pcard .body{padding:10px}
+.pcard .name{font-size:13px;font-weight:600;line-height:1.35}
+.pcard .price{font-size:15px;font-weight:800;margin-top:4px}
+.pcard .price s{font-size:12px;color:var(--ink-2);font-weight:500;margin-left:4px}
+.pcard .price em{font-style:normal;color:var(--rose);margin-right:4px}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;margin-bottom:6px;background:var(--cobalt-soft);color:var(--cobalt)}
+.badge.sale{background:var(--rose);color:#fff}
+.badge.out{background:var(--line);color:var(--ink-2)}
+.pcard .btn{display:block;margin-top:8px;text-align:center;font-size:12px;font-weight:700;padding:6px;border-radius:6px;background:var(--ink);color:var(--sheet)}
+.pcard.soldout .img{filter:grayscale(1);opacity:.55}
+.pcard.soldout .btn{background:var(--line);color:var(--ink-2)}
+.args{border-top:1px solid var(--line);padding:10px 14px;font-size:13px;color:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-x:auto;white-space:nowrap}
+.args span{color:var(--cobalt)}
+.hero-note{font-size:14px;color:var(--ink-2);margin-top:12px}
+
+/* ---------- flow diagram ---------- */
+.flow svg{width:100%;height:auto;display:block}
+.flow .n rect{fill:var(--sheet);stroke:var(--line);stroke-width:1.5}
+.flow .n.core rect{fill:var(--ink);stroke:var(--ink)}
+.flow .n.core text{fill:var(--sheet)}
+.flow .n text{fill:var(--ink);font-size:15px;font-weight:700;font-family:inherit}
+.flow .n text.s{font-size:12px;font-weight:500;fill:var(--ink-2)}
+.flow .n.core text.s{fill:var(--sheet);opacity:.75}
+.flow .wk{font-size:11px;font-weight:700}
+.flow path{fill:none;stroke:var(--ink-2);stroke-width:1.5}
+.flow .p1 rect{stroke:var(--cobalt)} .flow .p2 rect{stroke:var(--mint)}
+.flow svg.flow-mobile{display:none}
+
+/* ---------- timeline ---------- */
+.phases{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.phase{border-radius:10px;padding:12px 16px;font-size:15px}
+.phase b{display:block;font-size:17px}
+.phase.a{background:var(--cobalt-soft)} .phase.a b{color:var(--cobalt)}
+.phase.b{background:var(--mint-soft)} .phase.b b{color:var(--mint)}
+.weeks{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;position:relative}
+.week{
+  font:inherit;text-align:left;cursor:pointer;color:var(--ink);
+  background:var(--sheet);border:1.5px solid var(--line);border-radius:10px;padding:12px;
+  display:flex;flex-direction:column;gap:2px;min-height:96px;position:relative
+}
+.week .no{font-size:13px;font-weight:700}
+.week .t{font-size:16px;font-weight:750;line-height:1.3}
+.week[data-p="a"] .no{color:var(--cobalt)} .week[data-p="b"] .no{color:var(--mint)}
+.week[aria-selected="true"][data-p="a"]{border-color:var(--cobalt);box-shadow:inset 0 -4px 0 var(--cobalt)}
+.week[aria-selected="true"][data-p="b"]{border-color:var(--mint);box-shadow:inset 0 -4px 0 var(--mint)}
+.detail{
+  margin-top:12px;background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:24px;
+  display:grid;grid-template-columns:1fr 1fr;gap:28px
+}
+.detail h3{font-size:22px;letter-spacing:-.02em;grid-column:1/-1}
+.detail h4{margin:0 0 8px;font-size:14px;color:var(--ink-2);font-weight:700}
+.detail ul{margin:0;padding-left:18px}
+.detail li{margin:4px 0}
+.detail .task{background:var(--paper);border-radius:8px;padding:14px 16px}
+.detail .builds{grid-column:1/-1;font-size:14px;color:var(--ink-2)}
+.detail .builds b{color:var(--ink)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--paper);padding:1px 5px;border-radius:4px}
+.task code{background:var(--sheet)}
+
+/* ---------- component tree ---------- */
+.tree-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:start}
+.tree svg{width:100%;height:auto;display:block}
+.tree .box rect{fill:var(--sheet);stroke:var(--line);stroke-width:1.5}
+.tree .box text{fill:var(--ink);font-size:14px;font-weight:700;font-family:inherit}
+.tree .box text.w{font-size:11px;font-weight:600;fill:var(--ink-2)}
+.tree .box.root rect{stroke:var(--cobalt);stroke-width:2}
+.tree path{fill:none;stroke:var(--ink-2);stroke-width:1.5}
+.tree .solo rect{stroke-dasharray:4 3}
+.tree-side p{margin:0 0 12px;color:var(--ink-2)}
+
+/* ---------- session split ---------- */
+.split{display:flex;border-radius:10px;overflow:hidden;height:64px;font-weight:700;font-size:15px}
+.split div{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 8px;line-height:1.25}
+.split .s1{background:var(--cobalt-soft);color:var(--cobalt)}
+.split .s2{background:var(--amber-soft);color:var(--amber)}
+.split .s3{background:var(--mint-soft);color:var(--mint)}
+.scale{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);margin-top:6px}
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:36px;counter-reset:c}
+.cycle li{list-style:none;position:relative;padding:14px 18px 14px 0;font-size:15px}
+.cycle li b{display:block;font-size:16px}
+.cycle li::before{
+  counter-increment:c;content:counter(c);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:var(--sheet);font-size:13px;font-weight:700;margin-bottom:8px
+}
+.cycle li:not(:last-child)::after{content:"";position:absolute;top:14px;left:36px;right:8px;border-top:1.5px dashed var(--line)}
+.cycle{padding:0;margin-left:0}
+
+/* ---------- deliverables ---------- */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.checks{list-style:none;padding:0;margin:0}
+.checks li{border-bottom:1px solid var(--line)}
+.checks label{display:flex;gap:12px;align-items:flex-start;padding:12px 0;cursor:pointer}
+.checks input{position:absolute;opacity:0;width:1px;height:1px}
+.checks .box{flex:none;width:22px;height:22px;border:2px solid var(--line);border-radius:6px;margin-top:2px;display:grid;place-items:center;transition:background .15s,border-color .15s}
+.checks input:checked+.box{background:var(--mint);border-color:var(--mint)}
+.checks input:checked+.box::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.checks input:checked~.txt{color:var(--ink-2);text-decoration:line-through}
+.checks input:focus-visible+.box{outline:3px solid var(--cobalt);outline-offset:2px}
+.progress{font-size:14px;color:var(--ink-2);margin-top:12px}
+.qs{margin:0;padding-left:20px}
+.qs li{margin:0 0 12px}
+
+/* ---------- refs ---------- */
+.refs{width:100%;border-collapse:collapse;font-size:15px}
+.refs th,.refs td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.refs th{font-size:13px;color:var(--ink-2);font-weight:700}
+footer{padding:32px 0 56px;color:var(--ink-2);font-size:14px;border-top:1px solid var(--line)}
+.theme-toggle{font:inherit;font-size:13px;background:transparent;border:1px solid var(--line);color:var(--ink-2);border-radius:999px;padding:4px 12px;cursor:pointer;float:right}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:32px;padding-top:40px}
+  .weeks{grid-template-columns:repeat(3,1fr)}
+  .tree-grid,.two{grid-template-columns:1fr;gap:28px}
+  .flow svg.flow-desktop{display:none}
+  .flow svg.flow-mobile{display:block}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  section{padding:44px 0}
+  .stage{padding:16px;gap:10px}
+  .pcard .name{font-size:12px}
+  .pcard .img{font-size:26px}
+  .phases{grid-template-columns:1fr}
+  .weeks{grid-template-columns:repeat(2,1fr)}
+  .detail{grid-template-columns:1fr;padding:18px;gap:20px}
+  .cycle{grid-template-columns:1fr 1fr;row-gap:8px}
+  .cycle li:nth-child(2)::after{display:none}
+  .split{font-size:13px;height:72px}
+  .canvas-bar .tree button{padding:3px 7px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <h1>Storybook 스터디<small>6주 동안 컴포넌트 라이브러리를 직접 만들고, 문서·테스트·배포까지</small></h1>
+    <p>컴포넌트를 앱에서 떼어내 상태별로 만들고 확인하는 법을 배웁니다. 마지막 주에는 Figma와 AI 에이전트까지 연결합니다.</p>
+    <ul class="facts">
+      <li>Storybook 10.6</li>
+      <li>주 1회 90분</li>
+      <li>React + Vite + TS</li>
+      <li>2026년 10월 시작</li>
+    </ul>
+  </div>
+
+  <div>
+    <div class="canvas" aria-label="Storybook 화면 예시: ProductCard 컴포넌트의 세 가지 스토리">
+      <div class="canvas-bar">
+        <b>ProductCard</b>
+        <div class="tree" role="group" aria-label="스토리 선택">
+          <button type="button" aria-pressed="false" data-s="0">Default</button>
+          <button type="button" aria-pressed="false" data-s="1">OnSale</button>
+          <button type="button" aria-pressed="false" data-s="2">SoldOut</button>
+        </div>
+      </div>
+      <div class="stage">
+        <figure class="story" style="margin:0" data-s="0">
+          <div class="pcard"><div class="img" aria-hidden="true">🍓</div><div class="body">
+            <span class="badge">신선</span>
+            <div class="name">설향 딸기 500g</div>
+            <div class="price">12,900원</div>
+            <span class="btn">담기</span></div></div>
+          <figcaption>Default</figcaption>
+        </figure>
+        <figure class="story" style="margin:0" data-s="1">
+          <div class="pcard"><div class="img" aria-hidden="true">🍓</div><div class="body">
+            <span class="badge sale">특가</span>
+            <div class="name">설향 딸기 500g</div>
+            <div class="price"><em>30%</em>9,030원</div>
+            <span class="btn">담기</span></div></div>
+          <figcaption>OnSale</figcaption>
+        </figure>
+        <figure class="story" style="margin:0" data-s="2">
+          <div class="pcard soldout"><div class="img" aria-hidden="true">🍓</div><div class="body">
+            <span class="badge out">품절</span>
+            <div class="name">설향 딸기 500g</div>
+            <div class="price">12,900원</div>
+            <span class="btn">재입고 알림</span></div></div>
+          <figcaption>SoldOut</figcaption>
+        </figure>
+      </div>
+      <div class="args" id="args">args: { <span>name</span>: "설향 딸기 500g", <span>price</span>: 12900, <span>discount</span>: 0, <span>soldOut</span>: false }</div>
+    </div>
+    <p class="hero-note">스토리 하나 = 컴포넌트의 상태 하나. 위 버튼을 눌러보세요. 이 카드가 3주 차 실습 결과물입니다.</p>
+  </div>
+</header>
+
+<!-- ============ 전체 흐름 ============ -->
+<section class="flow" aria-labelledby="h-flow">
+  <h2 id="h-flow">무엇을 배우나</h2>
+  <p class="lead">컴포넌트에 스토리를 붙이면, 그 스토리 하나가 문서·테스트·디자인 검수·AI 작업의 재료가 됩니다. 앞 3주는 왼쪽 두 칸, 뒤 3주는 오른쪽 네 갈래입니다.</p>
+
+  <svg class="flow-desktop" viewBox="0 0 1040 330" role="img" aria-labelledby="flow-t">
+    <title id="flow-t">컴포넌트에서 스토리로, 스토리에서 문서·테스트·배포·Figma와 AI로 이어지는 흐름</title>
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink-2)" stroke="none"/></marker></defs>
+    <path d="M200,165 L262,165" marker-end="url(#ar)"/>
+    <path d="M462,165 C520,165 520,45 600,45" marker-end="url(#ar)"/>
+    <path d="M462,165 C530,165 530,125 600,125" marker-end="url(#ar)"/>
+    <path d="M462,165 C530,165 530,205 600,205" marker-end="url(#ar)"/>
+    <path d="M462,165 C520,165 520,285 600,285" marker-end="url(#ar)"/>
+    <g class="n p1"><rect x="10" y="115" width="190" height="100" rx="12"/>
+      <text x="28" y="148" class="wk" fill="var(--cobalt)">1주</text>
+      <text x="28" y="174">컴포넌트</text>
+      <text x="28" y="196" class="s">Button, Badge, PriceTag…</text></g>
+    <g class="n core"><rect x="264" y="105" width="198" height="120" rx="12"/>
+      <text x="282" y="140" class="wk" fill="var(--sheet)" opacity=".75">2–3주</text>
+      <text x="282" y="168">스토리 (CSF)</text>
+      <text x="282" y="190" class="s">args · decorators</text>
+      <text x="282" y="208" class="s">컴포넌트의 상태 하나씩</text></g>
+    <g class="n p2"><rect x="602" y="12" width="428" height="66" rx="12"/>
+      <text x="622" y="40" class="wk" fill="var(--mint)">4주</text>
+      <text x="664" y="40">문서</text>
+      <text x="664" y="62" class="s">Autodocs, MDX, 디자인 토큰 페이지</text></g>
+    <g class="n p2"><rect x="602" y="92" width="428" height="66" rx="12"/>
+      <text x="622" y="120" class="wk" fill="var(--mint)">5주</text>
+      <text x="664" y="120">테스트</text>
+      <text x="664" y="142" class="s">play 함수 인터랙션, Vitest, 접근성, 시각 회귀</text></g>
+    <g class="n p2"><rect x="602" y="172" width="428" height="66" rx="12"/>
+      <text x="622" y="200" class="wk" fill="var(--mint)">6주</text>
+      <text x="664" y="200">배포</text>
+      <text x="664" y="222" class="s">정적 빌드 → GitHub Pages, 디자이너·기획자와 공유</text></g>
+    <g class="n p2"><rect x="602" y="252" width="428" height="66" rx="12"/>
+      <text x="622" y="280" class="wk" fill="var(--mint)">6주</text>
+      <text x="664" y="280">Figma · AI</text>
+      <text x="664" y="302" class="s">Designs 애드온, Code Connect, Storybook MCP</text></g>
+  </svg>
+
+  <svg class="flow-mobile" viewBox="0 0 360 560" role="img" aria-labelledby="flow-tm">
+    <title id="flow-tm">컴포넌트에서 스토리로, 스토리에서 네 가지 활용으로 이어지는 흐름</title>
+    <defs><marker id="arm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink-2)" stroke="none"/></marker></defs>
+    <path d="M180,80 L180,108" marker-end="url(#arm)"/>
+    <path d="M180,208 L180,228 L18,228 L18,500 L28,500" />
+    <path d="M18,284 L28,284" marker-end="url(#arm)"/>
+    <path d="M18,356 L28,356" marker-end="url(#arm)"/>
+    <path d="M18,428 L28,428" marker-end="url(#arm)"/>
+    <path d="M18,500 L28,500" marker-end="url(#arm)"/>
+    <g class="n p1"><rect x="40" y="6" width="280" height="74" rx="12"/>
+      <text x="58" y="36" class="wk" fill="var(--cobalt)">1주</text>
+      <text x="96" y="36">컴포넌트</text>
+      <text x="58" y="60" class="s">Button, Badge, PriceTag…</text></g>
+    <g class="n core"><rect x="40" y="110" width="280" height="98" rx="12"/>
+      <text x="58" y="142" class="wk" fill="var(--sheet)" opacity=".75">2–3주</text>
+      <text x="58" y="168">스토리 (CSF)</text>
+      <text x="58" y="190" class="s">args, decorators — 상태 하나씩</text></g>
+    <g class="n p2"><rect x="32" y="252" width="320" height="62" rx="12"/>
+      <text x="48" y="278" class="wk" fill="var(--mint)">4주</text><text x="88" y="278">문서</text>
+      <text x="48" y="300" class="s">Autodocs, MDX, 디자인 토큰</text></g>
+    <g class="n p2"><rect x="32" y="324" width="320" height="62" rx="12"/>
+      <text x="48" y="350" class="wk" fill="var(--mint)">5주</text><text x="88" y="350">테스트</text>
+      <text x="48" y="372" class="s">인터랙션, Vitest, 접근성</text></g>
+    <g class="n p2"><rect x="32" y="396" width="320" height="62" rx="12"/>
+      <text x="48" y="422" class="wk" fill="var(--mint)">6주</text><text x="88" y="422">배포</text>
+      <text x="48" y="444" class="s">GitHub Pages로 공유</text></g>
+    <g class="n p2"><rect x="32" y="468" width="320" height="62" rx="12"/>
+      <text x="48" y="494" class="wk" fill="var(--mint)">6주</text><text x="88" y="494">Figma · AI</text>
+      <text x="48" y="516" class="s">Code Connect, Storybook MCP</text></g>
+  </svg>
+</section>
+
+<!-- ============ 주차별 ============ -->
+<section aria-labelledby="h-weeks">
+  <h2 id="h-weeks">주차별 커리큘럼</h2>
+  <p class="lead">주차를 누르면 학습 내용과 실습 과제가 열립니다.</p>
+
+  <div class="phases">
+    <div class="phase a"><b>1–3주 · 스토리 잘 쓰기</b>설치부터 args, 복합 컴포넌트까지</div>
+    <div class="phase b"><b>4–6주 · 스토리로 일하기</b>문서, 테스트, 배포, 협업</div>
+  </div>
+
+  <div class="weeks" role="tablist" aria-label="주차">
+    <button class="week" role="tab" data-w="0" data-p="a"><span class="no">1주</span><span class="t">시작하기</span></button>
+    <button class="week" role="tab" data-w="1" data-p="a"><span class="no">2주</span><span class="t">스토리 작성</span></button>
+    <button class="week" role="tab" data-w="2" data-p="a"><span class="no">3주</span><span class="t">복합 컴포넌트와 데이터</span></button>
+    <button class="week" role="tab" data-w="3" data-p="b"><span class="no">4주</span><span class="t">문서화</span></button>
+    <button class="week" role="tab" data-w="4" data-p="b"><span class="no">5주</span><span class="t">테스트</span></button>
+    <button class="week" role="tab" data-w="5" data-p="b"><span class="no">6주</span><span class="t">배포 · 협업 · AI</span></button>
+  </div>
+
+  <div class="detail" id="detail" role="tabpanel" aria-live="polite"></div>
+</section>
+
+<!-- ============ 컴포넌트 구성 ============ -->
+<section aria-labelledby="h-tree">
+  <h2 id="h-tree">만들게 될 컴포넌트</h2>
+  <div class="tree-grid">
+    <div class="tree">
+      <svg viewBox="0 0 520 300" role="img" aria-labelledby="tree-t">
+        <title id="tree-t">ProductCard는 Badge, PriceTag, Button으로 구성되고 Tabs와 Modal은 독립 컴포넌트</title>
+        <path d="M160,92 L160,130 L60,130 L60,170"/>
+        <path d="M160,130 L160,170"/>
+        <path d="M160,130 L262,130 L262,170"/>
+        <g class="box root"><rect x="70" y="30" width="180" height="62" rx="10"/>
+          <text x="88" y="58">ProductCard</text><text x="88" y="78" class="w">3주 · 조합 컴포넌트</text></g>
+        <g class="box"><rect x="10" y="172" width="100" height="58" rx="10"/>
+          <text x="24" y="198">Badge</text><text x="24" y="216" class="w">2주</text></g>
+        <g class="box"><rect x="116" y="172" width="100" height="58" rx="10"/>
+          <text x="130" y="198">PriceTag</text><text x="130" y="216" class="w">2주</text></g>
+        <g class="box"><rect x="222" y="172" width="100" height="58" rx="10"/>
+          <text x="236" y="198">Button</text><text x="236" y="216" class="w">1주</text></g>
+        <g class="box solo"><rect x="376" y="30" width="130" height="62" rx="10"/>
+          <text x="394" y="58">Tabs</text><text x="394" y="78" class="w">3주</text></g>
+        <g class="box solo"><rect x="376" y="120" width="130" height="62" rx="10"/>
+          <text x="394" y="148">Modal</text><text x="394" y="168" class="w">5주 · 테스트용</text></g>
+        <text x="10" y="276" fill="var(--ink-2)" font-size="12" font-family="inherit">실선: 조합 관계   점선: 독립 컴포넌트</text>
+      </svg>
+    </div>
+    <div class="tree-side">
+      <p>쇼핑 화면에서 흔히 쓰는 작은 컴포넌트부터 만들고, 3주 차에 그것들을 조합해 ProductCard를 완성합니다.</p>
+      <p>Tabs는 반응형·테마 확인용, Modal은 5주 차 인터랙션 테스트(열기·닫기·포커스 이동) 대상입니다.</p>
+      <p>모든 컴포넌트는 최소 3개의 스토리(기본·변형·비활성 또는 예외 상태)를 가집니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 진행 방식 ============ -->
+<section aria-labelledby="h-way">
+  <h2 id="h-way">한 주가 돌아가는 방식</h2>
+  <p class="lead">세션은 90분, 개인 실습은 주 2~3시간을 잡습니다.</p>
+
+  <div class="split" role="img" aria-label="90분 세션: 개념 공유 30분, 라이브 코딩 30분, 과제 리뷰와 질문 30분">
+    <div class="s1">개념 공유</div><div class="s2">라이브 코딩</div><div class="s3">과제 리뷰 · 질문</div>
+  </div>
+  <div class="scale"><span>0분</span><span>30분</span><span>60분</span><span>90분</span></div>
+
+  <ol class="cycle">
+    <li><b>문서 읽기</b>세션 전, 공식 문서 해당 챕터</li>
+    <li><b>세션</b>개념 공유와 라이브 코딩</li>
+    <li><b>실습 PR</b>과제를 브랜치로 만들어 제출</li>
+    <li><b>리뷰</b>다음 세션 첫 10분에 PR 리뷰</li>
+  </ol>
+
+  <div class="two" style="margin-top:32px">
+    <div>
+      <h3 style="font-size:18px;margin-bottom:8px">준비물</h3>
+      <ul style="margin:0;padding-left:20px;color:var(--ink-2)">
+        <li>Node.js 20 이상</li>
+        <li>GitHub 계정과 실습용 저장소</li>
+        <li>VS Code</li>
+        <li>디자인 토큰·컴포넌트가 있는 Figma 파일 1개</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="font-size:18px;margin-bottom:8px">끝나면 할 수 있는 것</h3>
+      <ul style="margin:0;padding-left:20px;color:var(--ink-2)">
+        <li>컴포넌트를 앱과 분리해 상태별로 개발</li>
+        <li>디자이너·기획자가 보는 문서 사이트 배포</li>
+        <li>스토리 기반 인터랙션·접근성 테스트</li>
+        <li>Figma 디자인과 코드 연결, MCP로 에이전트와 작업</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 산출물 ============ -->
+<section aria-labelledby="h-out">
+  <div class="two">
+    <div>
+      <h2 id="h-out">최종 산출물</h2>
+      <p class="lead" style="margin-bottom:12px">6주 차 끝에 배포된 컴포넌트 문서 사이트 1개가 남습니다. 체크 상태는 이 브라우저에만 저장됩니다.</p>
+      <ul class="checks" id="checks">
+        <li><label><input type="checkbox"><span class="box"></span><span class="txt">컴포넌트 6개, 각 3개 이상의 스토리</span></label></li>
+        <li><label><input type="checkbox"><span class="box"></span><span class="txt">Autodocs와 디자인 토큰 MDX 페이지</span></label></li>
+        <li><label><input type="checkbox"><span class="box"></span><span class="txt">인터랙션 테스트 2개 이상, 접근성 위반 0건</span></label></li>
+        <li><label><input type="checkbox"><span class="box"></span><span class="txt">GitHub Pages에 배포된 URL</span></label></li>
+        <li><label><input type="checkbox"><span class="box"></span><span class="txt">최소 1개 컴포넌트에 Figma 디자인 연결</span></label></li>
+      </ul>
+      <p class="progress" id="progress"></p>
+    </div>
+    <div>
+      <h2>회고 질문</h2>
+      <p class="lead" style="margin-bottom:12px">6주 차 마지막 30분에 함께 이야기합니다.</p>
+      <ol class="qs">
+        <li>실제 업무 프로젝트에 Storybook을 도입한다면 어떤 컴포넌트부터 옮길까?</li>
+        <li>디자이너와의 검수 흐름에서 줄어드는 단계는 무엇인가?</li>
+        <li>다음 스터디 주제로 디자인 시스템 운영, Chromatic 도입, 모노레포 구성 중 무엇을 이어갈까?</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 참고 자료 ============ -->
+<section aria-labelledby="h-ref">
+  <h2 id="h-ref">참고 자료</h2>
+  <table class="refs">
+    <thead><tr><th>자료</th><th>언제 보나</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://storybook.js.org/docs">Storybook 공식 문서</a></td><td>매주 기본 교재</td></tr>
+      <tr><td><a href="https://storybook.js.org/tutorials/">Intro to Storybook 튜토리얼</a></td><td>1–3주 예습</td></tr>
+      <tr><td><a href="https://storybook.js.org/releases/10.6">Storybook 10.6 릴리스</a></td><td>최신 버전 변경점</td></tr>
+      <tr><td><a href="https://storybook.js.org/releases/10.3">Storybook 10.3 릴리스 (MCP 소개)</a></td><td>6주 차 MCP 실습 전</td></tr>
+      <tr><td><a href="https://storybook.js.org/releases">전체 릴리스 노트</a></td><td>신기능 확인</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <button class="theme-toggle" id="theme" type="button">다크 모드</button>
+  권수영이 2026년 10월 1일에 작성
+</footer>
+</div>
+
+<script>
+const WEEKS = [
+  {t:"1주 · 시작하기",
+   learn:["컴포넌트 주도 개발(CDD) 개념","<code>npm create storybook@latest</code>로 설치","폴더 구조, <code>.storybook/main</code>·<code>preview</code> 설정"],
+   task:"빈 Vite 프로젝트에 Storybook을 설치하고 Button 스토리 3개(Primary, Secondary, Disabled)를 작성합니다.",
+   builds:"Button"},
+  {t:"2주 · 스토리 작성",
+   learn:["CSF(Component Story Format)","args와 argTypes","Controls·Actions 패널","decorators와 전역 parameters"],
+   task:"Badge와 PriceTag를 만들고, 할인가·품절 같은 상태를 args로 표현합니다.",
+   builds:"Badge, PriceTag"},
+  {t:"3주 · 복합 컴포넌트와 데이터",
+   learn:["컴포넌트 조합 (ProductCard = Badge + PriceTag + Button)","loaders와 목(mock) 데이터","Viewports와 테마 전환"],
+   task:"ProductCard와 Tabs를 만들고, 모바일·PC 뷰포트와 다크 테마에서 확인합니다.",
+   builds:"ProductCard, Tabs"},
+  {t:"4주 · 문서화",
+   learn:["Autodocs","MDX 문서 페이지","디자인 토큰(색상·타이포) 문서","사용 가이드 작성법"],
+   task:"컴포넌트별 Autodocs를 켜고, 디자인 토큰 MDX 페이지 1개를 작성합니다.",
+   builds:"문서 페이지"},
+  {t:"5주 · 테스트",
+   learn:["play 함수로 인터랙션 테스트","Vitest 애드온","접근성(a11y) 테스트","시각 회귀 테스트(Chromatic) 개념"],
+   task:"Modal 열기·닫기 인터랙션 테스트를 쓰고, 접근성 위반을 0건으로 만듭니다.",
+   builds:"Modal"},
+  {t:"6주 · 배포 · 협업 · AI",
+   learn:["정적 빌드와 GitHub Pages 배포","Figma 연동 (Designs 애드온, Code Connect)","Storybook MCP로 에이전트와 컴포넌트 작업"],
+   task:"스토리북 사이트를 배포하고, Claude Code에 Storybook MCP를 연결해 새 컴포넌트 1개를 만들어 봅니다.",
+   builds:"배포 URL"}
+];
+const tabs=[...document.querySelectorAll('.week')];
+const detail=document.getElementById('detail');
+function show(i){
+  tabs.forEach((b,j)=>{b.setAttribute('aria-selected',j===i);b.tabIndex=j===i?0:-1;});
+  const w=WEEKS[i];
+  detail.innerHTML=`<h3>${w.t}</h3>
+    <div><h4>학습 내용</h4><ul>${w.learn.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="task"><h4>실습 과제</h4>${w.task}</div>
+    <div class="builds">이번 주 만드는 것: <b>${w.builds}</b></div>`;
+}
+tabs.forEach((b,i)=>{
+  b.addEventListener('click',()=>show(i));
+  b.addEventListener('keydown',e=>{
+    const d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;
+    if(d){const n=(i+d+tabs.length)%tabs.length;show(n);tabs[n].focus();}
+  });
+});
+show(0);
+
+/* hero stories */
+const ARGS=[
+  '{ <span>name</span>: "설향 딸기 500g", <span>price</span>: 12900, <span>discount</span>: 0, <span>soldOut</span>: false }',
+  '{ <span>name</span>: "설향 딸기 500g", <span>price</span>: 12900, <span>discount</span>: 30, <span>soldOut</span>: false }',
+  '{ <span>name</span>: "설향 딸기 500g", <span>price</span>: 12900, <span>discount</span>: 0, <span>soldOut</span>: true }'
+];
+const sBtns=[...document.querySelectorAll('.canvas-bar button')];
+const stories=[...document.querySelectorAll('.story')];
+const argsEl=document.getElementById('args');
+sBtns.forEach(b=>b.addEventListener('click',()=>{
+  const s=+b.dataset.s, on=b.getAttribute('aria-pressed')==='true';
+  sBtns.forEach(x=>x.setAttribute('aria-pressed',(!on&&x===b)));
+  stories.forEach(st=>st.classList.toggle('dim',!on&&+st.dataset.s!==s));
+  argsEl.innerHTML='args: '+ARGS[on?0:s];
+}));
+
+/* checklist */
+const KEY='sb-study-checks';
+const boxes=[...document.querySelectorAll('#checks input')];
+const prog=document.getElementById('progress');
+let saved=[];
+try{saved=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}
+boxes.forEach((b,i)=>{b.checked=!!saved[i];b.addEventListener('change',upd)});
+function upd(){
+  const st=boxes.map(b=>b.checked);
+  try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}
+  prog.textContent=`${st.filter(Boolean).length} / ${boxes.length} 완료`;
+}
+upd();
+
+/* theme */
+const tb=document.getElementById('theme');
+function curDark(){const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches}
+function label(){tb.textContent=curDark()?'라이트 모드':'다크 모드'}
+tb.addEventListener('click',()=>{document.documentElement.dataset.theme=curDark()?'light':'dark';label()});
+label();
+</script>
+</body>
+</html>
