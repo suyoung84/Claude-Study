@@ -124,6 +124,15 @@ h2{font-size:clamp(24px,3.2vw,32px);font-weight:750;letter-spacing:-.02em;margin
 .week[data-p="a"] .no{color:var(--cobalt)} .week[data-p="b"] .no{color:var(--mint)}
 .week[aria-selected="true"][data-p="a"]{border-color:var(--cobalt);box-shadow:inset 0 -4px 0 var(--cobalt)}
 .week[aria-selected="true"][data-p="b"]{border-color:var(--mint);box-shadow:inset 0 -4px 0 var(--mint)}
+/* 완료한 주차 */
+.week.done[data-p="a"]{background:var(--cobalt-soft)} .week.done[data-p="b"]{background:var(--mint-soft)}
+.week .chk{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;display:none;place-items:center}
+.week.done .chk{display:grid}
+.week[data-p="a"] .chk{background:var(--cobalt)} .week[data-p="b"] .chk{background:var(--mint)}
+.week .chk::after{content:"";width:5px;height:10px;border:solid var(--sheet);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.week .done-tag{display:none;font-weight:600;margin-left:4px}
+.week.done .done-tag{display:inline}
+.wprog{font-weight:700;color:var(--ink);white-space:nowrap}
 .detail{
   margin-top:12px;background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:24px;
   display:grid;grid-template-columns:1fr 1fr;gap:28px
@@ -135,6 +144,11 @@ h2{font-size:clamp(24px,3.2vw,32px);font-weight:750;letter-spacing:-.02em;margin
 .detail .task{background:var(--paper);border-radius:8px;padding:14px 16px}
 .detail .builds{grid-column:1/-1;font-size:14px;color:var(--ink-2)}
 .detail .builds b{color:var(--ink)}
+.detail .builds{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.detail .week-done{list-style:none;margin:0;padding:0}
+.detail .week-done li{border:none;margin:0}
+.detail .week-done label{padding:0;align-items:center;color:var(--ink);font-weight:700;font-size:15px}
+.detail .week-done .box{margin-top:0}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--paper);padding:1px 5px;border-radius:4px}
 .task code{background:var(--sheet)}
 
@@ -344,7 +358,7 @@ footer{padding:32px 0 56px;color:var(--ink-2);font-size:14px;border-top:1px soli
 <!-- ============ 주차별 ============ -->
 <section aria-labelledby="h-weeks">
   <h2 id="h-weeks">주차별 커리큘럼</h2>
-  <p class="lead">주차를 누르면 학습 내용과 실습 과제가 열립니다.</p>
+  <p class="lead">주차를 누르면 학습 내용과 실습 과제가 열립니다. 끝낸 주차는 완료 체크하세요. <span class="wprog" id="wprog"></span></p>
 
   <div class="phases">
     <div class="phase a"><b>1–3주 · 스토리 잘 쓰기</b>설치부터 args, 복합 컴포넌트까지</div>
@@ -512,14 +526,37 @@ const WEEKS = [
 ];
 const tabs=[...document.querySelectorAll('.week')];
 const detail=document.getElementById('detail');
+const wprog=document.getElementById('wprog');
+
+/* 주차 완료 상태 (이 브라우저에만 저장) */
+const WKEY='sb-study-weeks';
+let weekDone=[];
+try{weekDone=JSON.parse(localStorage.getItem(WKEY)||'[]')}catch(e){}
+tabs.forEach(b=>{
+  b.querySelector('.no').insertAdjacentHTML('beforeend','<span class="done-tag">· 완료</span>');
+  b.insertAdjacentHTML('beforeend','<span class="chk" aria-hidden="true"></span>');
+});
+function renderDone(){
+  tabs.forEach((b,i)=>b.classList.toggle('done',!!weekDone[i]));
+  wprog.textContent=`${tabs.filter((_,i)=>weekDone[i]).length} / ${tabs.length}주 완료`;
+}
+function setDone(i,on){
+  weekDone[i]=on;
+  try{localStorage.setItem(WKEY,JSON.stringify(weekDone))}catch(e){}
+  renderDone();
+}
+
 function show(i){
   tabs.forEach((b,j)=>{b.setAttribute('aria-selected',j===i);b.tabIndex=j===i?0:-1;});
   const w=WEEKS[i];
   detail.innerHTML=`<h3>${w.t}</h3>
     <div><h4>학습 내용</h4><ul>${w.learn.map(x=>`<li>${x}</li>`).join('')}</ul></div>
     <div class="task"><h4>실습 과제</h4>${w.task}</div>
-    <div class="builds">이번 주 만드는 것: <b>${w.builds}</b></div>`;
+    <div class="builds"><span>이번 주 만드는 것: <b>${w.builds}</b></span>
+      <ul class="checks week-done"><li><label><input type="checkbox" id="week-done"${weekDone[i]?' checked':''}><span class="box"></span><span>이번 주 완료</span></label></li></ul></div>`;
+  detail.querySelector('#week-done').addEventListener('change',e=>setDone(i,e.target.checked));
 }
+renderDone();
 tabs.forEach((b,i)=>{
   b.addEventListener('click',()=>show(i));
   b.addEventListener('keydown',e=>{
